@@ -71,12 +71,7 @@ const userService = {
         update: (id, user, callback) => {
             logger.info(`Attempting to update user with id ${id}`, user);
         
-            if (!Array.isArray(database._data)) {
-                logger.error('Database data structure is not an array.');
-                return callback(new Error('Internal server error'), null);
-            }
-        
-            const existingUser = database._data.find(u => u.email === user.email && u.id !== id);
+            const existingUser = database.find(u => u.email === user.email && u.id !== id);
         
             if (existingUser) {
                 const error = new Error('A user with the same email address already exists.');
