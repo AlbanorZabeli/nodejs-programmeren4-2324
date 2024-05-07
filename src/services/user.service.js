@@ -71,9 +71,7 @@ const userService = {
     update: (id, user, callback) => {
         logger.info(`Attempting to update user with id ${id}`, user);
 
-        existingUser = database._data.find(u => u.email === user.email && u.id !== id);
-
-        if (existingUser) {
+        if (database._data.find(u => u.email === database._data.includes)) {
             const error = new Error('A user with the same email address already exists.');
             logger.error('Error updating user: ', error.message);
             return callback(error, null);
