@@ -73,16 +73,15 @@ const userService = {
 
         const existingUser = database._data.find(u => u.email === user.email && u.id !== id);
 
-
-
+        if (existingUser) {
+            const error = new Error('A user with the same email address already exists.');
+            logger.error('Error updating user: ', error.message);
+            return callback(error, null);
+        } else {
         database.update(id, user, (err, data) => {
             if (err) {
                 logger.error('Error updating user: ', err.message || 'unknown error');
                 callback(err, null);
-            } else if (existingUser) {
-                const error = new Error('A user with the same email address already exists.');
-                logger.error('Error updating user: ', error.message);
-                return callback(error, null);
             }
             else {
                 logger.trace(`User updated with id ${id}.`);
@@ -91,9 +90,9 @@ const userService = {
                     data: data
                 });
             }
-        });
+        })};
     }
-
+    
 }
 
 module.exports = userService
