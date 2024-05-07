@@ -37,6 +37,24 @@ const userService = {
             }
         })
     },
+
+    getById: (id, callback) => {
+        logger.info(`getById with id ${id}`);
+        database.getById(id, (err, data) => {
+            if (err) {
+                logger.error('error getting user: ', err.message || 'unknown error');
+                callback(err, null);
+            } else if (!data) {
+                logger.info(`User not found with id ${id}`);
+                callback(new Error('User not found'), null);
+            } else {
+                callback(null, {
+                    message: `User found with id ${id}.`,
+                    data: data
+                });
+            }
+        });
+    },
         
         delete: (id, callback) => {
             logger.info(`delete user with id ${id}`);
