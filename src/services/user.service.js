@@ -71,7 +71,10 @@ const userService = {
         update: (id, user, callback) => {
             logger.info(`update user with id ${id}`, user);
             database.update(id, user, (err, data) => {
-                if (err) {
+                if (database._data.includes) {
+                    logger.error('user already exists', err.message || 'unknown error');
+                    callback(err, null);
+                } else if (err){
                     logger.error('error updating user: ', err.message || 'unknown error');
                     callback(err, null);
                 } else {
