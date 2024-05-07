@@ -69,10 +69,24 @@ const userService = {
         },
     
         update: (id, user, callback) => {
-            logger.info(`update user with id ${id}`, user);
+            logger.info(`Attempting to update user with id ${id}`, user);
+        
+            if (!Array.isArray(database._data)) {
+                logger.error('Database data structure is not an array.');
+                return callback(new Error('Internal server error'), null);
+            }
+        
+            const existingUser = database._data.find(u => u.email === user.email && u.id !== id);
+        
+            if (existingUser) {
+                const error = new Error('A user with the same email address already exists.');
+                logger.error('Error updating user: ', error.message);
+                return callback(error, null);
+            }
+        
             database.update(id, user, (err, data) => {
                 if (err) {
-                    logger.error('error updating user: ', err.message || 'unknown error');
+                    logger.error('Error updating user: ', err.message || 'unknown error');
                     callback(err, null);
                 } else {
                     logger.trace(`User updated with id ${id}.`);
@@ -83,6 +97,7 @@ const userService = {
                 }
             });
         }
+        
     }
 
 module.exports = userService
