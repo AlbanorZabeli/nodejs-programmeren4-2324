@@ -26,45 +26,45 @@ const userService = {
     getAll: (callback) => {
         logger.info('getAll')
 
-        // Deprecated: de 'oude' manier van werken, met de inmemory database
-        // database.getAll((err, data) => {
-        //     if (err) {
-        //         callback(err, null)
-        //     } else {
-        //         callback(null, {
-        //             message: `Found ${data.length} users.`,
-        //             data: data
-        //         })
-        //     }
-        // })
-
-        // Nieuwe manier van werken: met de MySQL database
-        db.getConnection(function (err, connection) {
+        database.getAll((err, data) => {
             if (err) {
-                logger.error(err)
                 callback(err, null)
-                return
+            } else {
+                callback(null, {
+                    message: `Found ${data.length} users.`,
+                    data: data
+                })
             }
-
-            connection.query(
-                'SELECT id, firstName, lastName FROM `user`',
-                function (error, results, fields) {
-                    connection.release()
-
-                    if (error) {
-                        logger.error(error)
-                        callback(error, null)
-                    } else {
-                        logger.debug(results)
-                        callback(null, {
-                            message: `Found ${results.length} users.`,
-                            data: results
-                        })
-                    }
-                }
-            )
         })
+    },
+        
+        delete: (id, callback) => {
+            logger.info(`delete user with id ${id}`);
+            database.delete(id, (err, result) => {
+                if (err) {
+                    logger.error('error deleting user: ', err.message || 'unknown error');
+                    callback(err, null);
+                } else {
+                    callback(null, result);
+                }
+            });
+        },
+    
+        update: (id, user, callback) => {
+            logger.info(`update user with id ${id}`, user);
+            database.update(id, user, (err, data) => {
+                if (err) {
+                    logger.error('error updating user: ', err.message || 'unknown error');
+                    callback(err, null);
+                } else {
+                    logger.trace(`User updated with id ${id}.`);
+                    callback(null, {
+                        message: `User updated successfully.`,
+                        data: data
+                    });
+                }
+            });
+        }
     }
-}
 
 module.exports = userService
