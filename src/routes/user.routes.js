@@ -80,13 +80,29 @@ const validateUserCreateChaiExpect = (req, res, next) => {
     }
 }
 
-// Userroutes
-router.post('/api/user', validateUserCreateChaiExpect, userController.create)
-router.get('/api/user', userController.getAll)
-router.get('/api/user/:userId', userController.getById)
+const validateLogin = (req, res, next) => {
+    const { emailAdress, password } = req.body;
+    if (!emailAdress || !password) {
+        next({
+            status: 400,
+            message: 'Email and password are required',
+            data: {}
+        });
+    } else {
+        next();
+    }
+};
+
+
+
+router.post('/api/login', validateLogin, userController.login);
+router.get('/api/user/profile', userController.getProfile);
+router.post('/api/user', validateUserCreateChaiExpect, userController.create);
+router.get('/api/user', userController.getAll);
+router.get('/api/user/:userId', userController.getById);
 
 // Tijdelijke routes om niet bestaande routes op te vangen
-router.put('/api/user/:userId', userController.update)
-router.delete('/api/user/:userId', userController.delete)
+router.put('/api/user/:userId', userController.update);
+router.delete('/api/user/:userId', userController.delete);
 
 module.exports = router
