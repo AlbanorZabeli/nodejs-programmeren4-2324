@@ -1,7 +1,6 @@
 const database = require('../../DbConnection')
 const logger = require('../util/logger')
 const jwt = require('jsonwebtoken')
-const db = require('../dao/mysql-db')
 const UserDao = require('../dao/UserDao')
 require('dotenv').config
 const { JsonWebTokenError } = require('jsonwebtoken')
