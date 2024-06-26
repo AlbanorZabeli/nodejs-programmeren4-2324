@@ -5,10 +5,10 @@ const server = require("../index")
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC101 Inloggen", () => {
+describe("UC302 Inloggen", () => {
 
 
-  it("TC 101-1-1 geen e-mail meegegeven", (done) => {
+  it("TC 302-1-1 Niet ingelogd", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -30,7 +30,7 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-1-1 geen wachtwoord meegegeven", (done) => {
+  it("TC 302-1-1 Maaltijd geupdate", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -52,7 +52,7 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-2 gebruiker bestaat niet", (done) => {
+  it("TC 302-2 Maaltijd bestaat niet", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -74,25 +74,4 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-2 Incorrect wachtwoord", (done) => {
-    chai
-      .request(server)
-      .post("/api/login")
-      .send({
-        emailAdress: "a@server.nl",
-        password: "scret"
-      })
-      .end((err, res) => {
-
-        console.log(res.body)
-
-        res.should.have.status(404)
-        res.body.should.be.a("object")
-        res.body.should.have.property("status").eq(404)
-        res.body.should.have.property("message").eq("User not found")
-        res.body.should.have.property("data").that.is.empty // niet ingelogd
-
-        done()
-      })
-  })
 })

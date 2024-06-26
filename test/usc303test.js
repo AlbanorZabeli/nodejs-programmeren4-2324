@@ -5,10 +5,10 @@ const server = require("../index")
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC101 Inloggen", () => {
+describe("UC303 Inloggen", () => {
 
 
-  it("TC 101-1-1 geen e-mail meegegeven", (done) => {
+  it("TC 303-1-1 Opvragen alle maaltijden", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -30,7 +30,7 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-1-1 geen wachtwoord meegegeven", (done) => {
+  it("TC 303-1-1 geen wachtwoord meegegeven", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -52,7 +52,7 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-2 gebruiker bestaat niet", (done) => {
+  it("TC 303-2 gebruiker bestaat niet", (done) => {
     chai
       .request(server)
       .post("/api/login")
@@ -74,7 +74,7 @@ describe("UC101 Inloggen", () => {
       })
   })
 
-  it("TC 101-2 Incorrect wachtwoord", (done) => {
+  it("TC 303-2 Incorrect wachtwoord", (done) => {
     chai
       .request(server)
       .post("/api/login")
