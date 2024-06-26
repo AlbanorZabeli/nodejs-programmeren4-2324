@@ -2,9 +2,12 @@ const express = require('express')
 const assert = require('assert')
 const chai = require('chai')
 chai.should()
+const jwt = require('jsonwebtoken')
 const router = express.Router()
 const userController = require('../controllers/user.controller')
 const logger = require('../util/logger')
+const database = require('../../DbConnection')
+const { error } = require('console')
 
 // Tijdelijke functie om niet bestaande routes op te vangen
 const notFound = (req, res, next) => {
@@ -80,6 +83,7 @@ const validateUserCreateChaiExpect = (req, res, next) => {
     }
 }
 
+
 const validateLogin = (req, res, next) => {
     const { emailAdress, password } = req.body;
     if (!emailAdress || !password) {
@@ -95,14 +99,13 @@ const validateLogin = (req, res, next) => {
 
 
 
+
 router.post('/api/login', validateLogin, userController.login);
 router.get('/api/user/profile', userController.getProfile);
-router.post('/api/user', validateUserCreateChaiExpect, userController.create);
-router.get('/api/user', userController.getAll);
-router.get('/api/user/:userId', userController.getById);
-
-// Tijdelijke routes om niet bestaande routes op te vangen
-router.put('/api/user/:userId', userController.update);
-router.delete('/api/user/:userId', userController.delete);
+router.post('/api/user', authenticateToken, validateUserCreateChaiExpect, userController.create);
+router.get('/api/user', authenticateToken, userController.getAll);
+router.get('/api/user/:userId', authenticateToken, userController.getById);
+router.put('/api/user/:userId', authenticateToken, userController.update);
+router.delete('/api/user/:userId', authenticateToken, userController.delete);
 
 module.exports = router

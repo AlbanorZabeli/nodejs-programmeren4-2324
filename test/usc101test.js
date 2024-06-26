@@ -30,7 +30,7 @@ describe("UC101 Inloggen", () => {
       })
   })
  
-  it("TC 101-3 gebruiker bestaat niet", (done) => {
+  it("TC 101-2 gebruiker bestaat niet", (done) => {
     chai
       .request(server)
       .post("/api/login")
