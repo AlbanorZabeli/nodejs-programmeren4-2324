@@ -89,7 +89,7 @@ describe("UC101 Inloggen", () => {
         res.should.have.status(404)
         res.body.should.be.a("object")
         res.body.should.have.property("status").eq(404)
-        res.body.should.have.property("message").eq("Incorrect password")
+        res.body.should.have.property("message").eq("User not found")
         res.body.should.have.property("data").that.is.empty // niet ingelogd
 
         done()

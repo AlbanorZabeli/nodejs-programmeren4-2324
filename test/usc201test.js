@@ -16,7 +16,7 @@ describe("UC201 Registreren als nieuwe gebruiker", () => {
       .send({
         "firstName": "Mark",
         "lastName": "Van Dam",
-        "emailAdress": "ae123sttest@server.nl",
+        "emailAdress": "ae1t@server.nl",
         "password": "secret",
         "isActive": true,
         "street": "Lovensdijkstraat 61",
