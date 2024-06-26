@@ -57,7 +57,7 @@ describe("UC101 Inloggen", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "j.doesnotexist@server.com", // does not exist
+        emailAdress: "a.doesnotexist@server.com", // does not exist
         password: "notsecret"
       })
       .end((err, res) => {
@@ -79,17 +79,17 @@ describe("UC101 Inloggen", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "j.doesnotexist@server.com", // does not exist
-        password: "notsecret"
+        emailAdress: "a@server.nl",
+        password: "scret"
       })
       .end((err, res) => {
 
         console.log(res.body)
 
-        res.should.have.status(404)
+        res.should.have.status(401)
         res.body.should.be.a("object")
-        res.body.should.have.property("status").eq(404)
-        res.body.should.have.property("message").eq("User not found")
+        res.body.should.have.property("status").eq(401)
+        res.body.should.have.property("message").eq("Incorrect password")
         res.body.should.have.property("data").that.is.empty // niet ingelogd
 
         done()
