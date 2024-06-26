@@ -86,10 +86,11 @@ let mealController = {
         });
     },
 
-    update: (req, res, next) => {
+        update: (req, res, next) => {
         const mealId = parseInt(req.params.mealId, 10);
         const mealData = req.body;
         logger.trace('update meal', mealId);
+    
         mealService.update(mealId, mealData, (error, success) => {
             if (error) {
                 return next({

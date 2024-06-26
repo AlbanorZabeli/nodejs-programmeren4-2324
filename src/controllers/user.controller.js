@@ -129,29 +129,33 @@ let userController = {
     },
 
         getProfile: async (req, res, next) => {
-        // Assume the token is sent in the Authorization header in the format 'Bearer <token>'
-        const token = req.headers.token;
-        if (!token) {
+        // Extract the token from the Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return next({
                 status: 401,
-                message: 'No token provided',
+                message: 'No token provided or invalid token format',
                 data: {}
             });
         }
     
-        try{
+        // Get the token from the header
+        const token = authHeader.split(' ')[1];
+    
+        try {
             // Decode the token using the same secret used to create the token
-            const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
             // Extract the user ID from the decoded token
-            const userId = decoded.id;
+            let userId = decoded.id;
             logger.info(userId);
-            if(typeof userId !== 'number'){
-                userId = parseInt(userId);
+    
+            if (typeof userId !== 'number') {
+                userId = parseInt(userId, 10); // Ensure the user ID is a number
             }
     
             // Fetch user details from the user service using the extracted ID
-            userService.getById(userId, (error, success) => {
+            userService.getProfileById(userId, (error, success) => {
                 if (error) {
                     return next({
                         status: error.status,
@@ -166,15 +170,15 @@ let userController = {
                     data: success.data
                 });
             });
-            } catch (error) {
-                return next({
-                    status: 401,
-                    message: 'Invalid or expired token',
-                    data: {}
-                });
-            }
+        } catch (error) {
+            return next({
+                status: 401,
+                message: 'Invalid or expired token',
+                data: {}
+            });
+        }
     }
-}    
+}
 
 
 module.exports = userController

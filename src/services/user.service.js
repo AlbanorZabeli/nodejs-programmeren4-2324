@@ -78,6 +78,26 @@ const userService = {
         });
     },
 
+    getProfileById: (id, callback) => {
+        logger.info(`getById with id ${id}`);
+        UserDao.getProfileById(id, (err, data) => {
+            if (!data) {
+                logger.info(`User not found with id ${id}`);
+                callback(new Error('User not found with id ' + id), null);
+                logger.error('error getting user: ', err.message || 'unknown error');
+                callback(err, null);
+            } else if (err) {
+                logger.error('error getting user: ', err.message || 'unknown error');
+                callback(err, null);
+            } else {
+                callback(null, {
+                    message: `User found with id ${id}.`,
+                    data: data
+                });
+            }
+        });
+    },
+
     delete: (id, callback) => {
         logger.info(`Attempting to delete user with id ${id}`);
     

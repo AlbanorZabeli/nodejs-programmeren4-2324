@@ -5,6 +5,8 @@ chai.should()
 const router = express.Router()
 const mealController = require('../controllers/meal.controller')
 const logger = require('../util/logger')
+const jwt = require('jsonwebtoken')
+
 
 // Tijdelijke functie om niet bestaande routes op te vangen
 const notFound = (req, res, next) => {
@@ -93,12 +95,42 @@ const validateLogin = (req, res, next) => {
     }
 };
 
+const validateToken = (req, res, next) => {
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return next({
+            status: 401,
+            message: 'No token provided or invalid token format',
+            data: {}
+        });
+    }
+
+    // Get the token from the header
+    const token = authHeader.split(' ')[1];
+
+    // Verify the token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return next({
+                status: 401,
+                message: 'Invalid or expired token',
+                data: {}
+            });
+        }
+
+        // Token is valid, attach the decoded payload to the request object
+        req.user = decoded;
+        next();
+    });
+};
 
 
-router.post('/api/meal', mealController.create);
-router.get('/api/meal', mealController.getAll);
-router.get('/api/meal/:mealId', mealController.getById);
-router.put('/api/meal/:mealId', mealController.update);
-router.delete('/api/meal/:mealId', mealController.delete);
+
+router.post('/api/meal', validateToken, mealController.create);
+router.get('/api/meal', validateToken, mealController.getAll);
+router.get('/api/meal/:mealId', validateToken, mealController.getById);
+router.put('/api/meal/:mealId', validateToken, mealController.update);
+router.delete('/api/meal/:mealId',validateToken, mealController.delete);
 
 module.exports = router

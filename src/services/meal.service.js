@@ -122,51 +122,51 @@ const mealService = {
         logger.info(`Attempting to update meal with id ${id}`, meal);
     
         // Prepare SQL query to check if the meal exists
-        const checkmealExistsQuery = "SELECT * FROM meal WHERE id = ?";
-        
-        database.query(checkmealExistsQuery, [id], (existError, existResults) => {
+        const checkMealExistsQuery = "SELECT * FROM meal WHERE id = ?";
+        database.query(checkMealExistsQuery, [id], (existError, existResults) => {
             if (existError) {
                 logger.error('Error checking meal existence: ', existError.message);
-                return callback(existError, null);
+                return callback({ status: 500, message: 'Database error: ' + existError.message });
             }
     
             // If no meal exists with the given ID, return an error
             if (existResults.length === 0) {
-                const err = new Error('No existing meal was found with id: ' + id);
+                const err = { status: 404, message: 'No existing meal was found with id: ' + id };
                 logger.error('Error: ', err.message);
                 return callback(err, null);
             }
     
             // Prepare SQL query to check for name uniqueness among other meals
             const checkNameUniqueQuery = "SELECT * FROM meal WHERE name = ? AND id != ?";
-            
             database.query(checkNameUniqueQuery, [meal.name, id], (nameError, nameResults) => {
                 if (nameError) {
                     logger.error('Error checking name uniqueness: ', nameError.message);
-                    return callback(nameError, null);
+                    return callback({ status: 500, message: 'Database error: ' + nameError.message });
                 }
     
                 if (nameResults.length > 0) {
-                    const error = new Error('A meal with the same name  already exists.');
+                    const error = { status: 400, message: 'A meal with the same name already exists.' };
                     logger.error('Error updating meal: ', error.message);
                     return callback(error, null);
                 }
     
-                MealDao.update(id, meal, (updateError, updateResults) => {
+                // Prepare SQL query to update the meal
+                const updateMealQuery = "UPDATE meal SET ? WHERE id = ?";
+                database.query(updateMealQuery, [meal, id], (updateError, updateResults) => {
                     if (updateError) {
                         logger.error('Error updating meal: ', updateError.message);
-                        return callback(updateError, null);
+                        return callback({ status: 500, message: 'Database error: ' + updateError.message });
                     }
     
                     if (updateResults.affectedRows === 0) {
-                        const err = new Error('No existing meal was updated with id: ' + id);
+                        const err = { status: 404, message: 'No existing meal was updated with id: ' + id };
                         logger.error('Error: ', err.message);
                         return callback(err, null);
                     }
     
-                    logger.trace(`meal updated with id ${id}.`);
+                    logger.trace(`Meal updated with id ${id}.`);
                     callback(null, {
-                        message: 'meal updated successfully.',
+                        message: 'Meal updated successfully.',
                         data: meal
                     });
                 });

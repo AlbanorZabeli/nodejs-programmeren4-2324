@@ -43,6 +43,25 @@ const UserDao = {
             }
         });
     },
+
+    getProfileById(id, callback) {
+        let query = "SELECT id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city FROM user WHERE id = ?";
+    
+        // Execute the SQL query using the database connection
+        database.query(query, [id], (error, results) => {
+            if (error) {
+                callback(error, null);
+                return;
+            }
+            // Check if any result is returned; if not, handle the "not found" case
+            if (results.length === 0) {
+                callback({ message: `Error: User with id ${id} does not exist!` }, null);
+            } else {
+                // Return the first result since ID should be unique and only one record should match
+                callback(null, results[0]);
+            }
+        });
+    },
     
     add(user, callback) {
         let query = "INSERT INTO user (firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

@@ -95,17 +95,49 @@ const validateLogin = (req, res, next) => {
     } else {
         next();
     }
+}
+
+const validateToken = (req, res, next) => {
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return next({
+            status: 401,
+            message: 'No token provided or invalid token format',
+            data: {}
+        });
+    }
+
+    // Get the token from the header
+    const token = authHeader.split(' ')[1];
+
+    // Verify the token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return next({
+                status: 401,
+                message: 'Invalid or expired token',
+                data: {}
+            });
+        }
+
+        // Token is valid, attach the decoded payload to the request object
+        req.user = decoded;
+        next();
+    });
 };
 
 
 
 
+
+
 router.post('/api/login', validateLogin, userController.login);
-router.get('/api/user/profile', userController.getProfile);
-router.post('/api/user', authenticateToken, validateUserCreateChaiExpect, userController.create);
-router.get('/api/user', authenticateToken, userController.getAll);
-router.get('/api/user/:userId', authenticateToken, userController.getById);
-router.put('/api/user/:userId', authenticateToken, userController.update);
-router.delete('/api/user/:userId', authenticateToken, userController.delete);
+router.get('/api/user/profile', validateToken, userController.getProfile);
+router.post('/api/user', validateToken, validateUserCreateChaiExpect, userController.create);
+router.get('/api/user', validateToken, userController.getAll);
+router.get('/api/user/:userId', validateToken, userController.getById);
+router.put('/api/user/:userId', validateToken, userController.update);
+router.delete('/api/user/:userId', validateToken, userController.delete);
 
 module.exports = router
