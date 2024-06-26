@@ -1,50 +1,39 @@
 const chai = require("chai")
 const chaiHttp = require("chai-http")
 const server = require("../index")
-const { expect } = chai;
+
 chai.should()
 chai.use(chaiHttp)
 
+describe("UC101 Inloggen", () => {
 
 
-describe("UC201 Registreren als nieuwe gebruiker", () => {
-
-  it("TC 201-1 succesvol geregistreerd", (done) => {
+  it("TC 101-1-1 geen e-mail meegegeven", (done) => {
     chai
       .request(server)
-      .post("/api/user")
+      .post("/api/login")
       .send({
-        "firstName": "Mark",
-        "lastName": "Van Dam",
-        "emailAdress": "ae1t@server.nl",
-        "password": "secret",
-        "isActive": true,
-        "street": "Lovensdijkstraat 61",
-        "city": "Breda",
-        "phoneNumber": "06 12312345",
-        "roles": []
+        // emailadress: "email",
+        password: "wachtwoord",
       })
       .end((err, res) => {
-        if (err) {
-            console.error('Error details:', err);
-            console.error('Response body:', res.body);
-            done(err);
-        } else {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.an('object');
-            expect(res.body)
-                .to.have.property('message')
-                .that.includes('User created with id');
 
-            done();
-        }
+        console.log(res.body)
+
+        res.should.have.status(400)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(400)
+        res.body.should.have.property("message").eq("Email and password are required")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
+
+        done()
       })
   })
 
-  it("TC 201-2 incorrect firstName", (done) => {
+  it("TC 101-1-1 geen wachtwoord meegegeven", (done) => {
     chai
       .request(server)
-      .post("/api/user")
+      .post("/api/login")
       .send({
         emailadress: "email",
         //password: "wachtwoord",
@@ -56,36 +45,51 @@ describe("UC201 Registreren als nieuwe gebruiker", () => {
         res.should.have.status(400)
         res.body.should.be.a("object")
         res.body.should.have.property("status").eq(400)
-        res.body.should.have.property("message").eq("Missing or incorrect firstName field")
-
+        res.body.should.have.property("message").eq("Email and password are required")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
 
         done()
       })
   })
 
-  it("TC 201-4 al bestaande e-mail", (done) => {
+  it("TC 101-2 gebruiker bestaat niet", (done) => {
     chai
       .request(server)
-      .post("/api/user")
+      .post("/api/login")
       .send({
-        "firstName": "Mark",
-        "lastName": "Van Dam",
-        "emailAdress": "a@server.nl",
-        "password": "secret",
-        "isActive": true,
-        "street": "Lovensdijkstraat 61",
-        "city": "Breda",
-        "phoneNumber": "06 12312345",
-        "roles": []
+        emailAdress: "a.doesnotexist@server.com", // does not exist
+        password: "notsecret"
       })
       .end((err, res) => {
 
         console.log(res.body)
 
-        res.should.have.status(500)
+        res.should.have.status(404)
         res.body.should.be.a("object")
-        res.body.should.have.property("status").eq(500)
-        res.body.should.have.property("message").eq("A user with the same email adress already exists.")
+        res.body.should.have.property("status").eq(404)
+        res.body.should.have.property("message").eq("User not found")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
+
+        done()
+      })
+  })
+
+  it("TC 101-2 Incorrect wachtwoord", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "a@server.nl",
+        password: "scret"
+      })
+      .end((err, res) => {
+
+        console.log(res.body)
+
+        res.should.have.status(404)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(404)
+        res.body.should.have.property("message").eq("User not found")
         res.body.should.have.property("data").that.is.empty // niet ingelogd
 
         done()

@@ -1,74 +1,98 @@
 const chai = require("chai")
 const chaiHttp = require("chai-http")
 const server = require("../index")
-const { expect } = chai;
+
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC205 Opvragen profiel", () => {
+describe("UC101 Inloggen", () => {
 
-    beforeEach((done) => {
-        // Log in to get a token
-        chai.request(server)
-            .post('/api/login')
-            .send({ emailAdress: 'a@server.nl', password: 'secret' })
-            .end((err, res) => {
-                if (err) {
-                    done(err);
-                } else {
-                    token = res.body.data.token;
-                    done();
-                }
-            });
-    });
 
-    it('should update user details successfully', (done) => {
-        chai.request(server)
-            .put('/api/user/1') // Update the user with ID 1
-            .set('Authorization', `Bearer ${token}`)
-            .send({
-                firstName: 'Updated',
-                lastName: 'User'
-            })
-            .end((err, res) => {
-                console.log('Update user details response:', res.body);
-                expect(res).to.have.status(200);
-                expect(res.body).to.be.an('object');
-                expect(res.body).to.have.property('status', 200);
-                expect(res.body.data).to.have.property('firstName', 'Updated');
-                expect(res.body.data).to.have.property('lastName', 'User');
-                done();
-            });
-    });
+  it("TC 101-1-1 geen e-mail meegegeven", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        // emailadress: "email",
+        password: "wachtwoord",
+      })
+      .end((err, res) => {
 
-    it('should return an error if the user does not exist', (done) => {
-        chai.request(server)
-            .put('/api/user/999')
-            .set('Authorization', `Bearer ${token}`)
-            .send({
-                firstName: 'Updated',
-                lastName: 'User'
-            })
-            .end((err, res) => {
-                console.log('Error if user does not exist response:', res.body);
-                expect(res).to.have.status(500);
-                expect(res.body).to.be.an('object');
-                expect(res.body).to.have.property('status', 500);
-                expect(res.body).to.have.property('message', 'No existing user was found with id: 999');
-                done();
-            });
-    });
+        console.log(res.body)
 
-    it('should return an error for missing token', (done) => {
-        chai.request(server)
-            .get('/api/user/profile')
-            .end((err, res) => {
-                expect(res).to.have.status(401);
-                expect(res.body).to.be.an('object');
-                expect(res.body).to.have.property('status', 401);
-                expect(res.body).to.have.property('message', 'No token provided or invalid token format');
-                done();
-            });
-    });
+        res.should.have.status(400)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(400)
+        res.body.should.have.property("message").eq("Email and password are required")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
 
+        done()
+      })
+  })
+
+  it("TC 101-1-1 geen wachtwoord meegegeven", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailadress: "email",
+        //password: "wachtwoord",
+      })
+      .end((err, res) => {
+
+        console.log(res.body)
+
+        res.should.have.status(400)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(400)
+        res.body.should.have.property("message").eq("Email and password are required")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
+
+        done()
+      })
+  })
+
+  it("TC 101-2 gebruiker bestaat niet", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "a.doesnotexist@server.com", // does not exist
+        password: "notsecret"
+      })
+      .end((err, res) => {
+
+        console.log(res.body)
+
+        res.should.have.status(404)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(404)
+        res.body.should.have.property("message").eq("User not found")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
+
+        done()
+      })
+  })
+
+  it("TC 101-2 Incorrect wachtwoord", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "a@server.nl",
+        password: "scret"
+      })
+      .end((err, res) => {
+
+        console.log(res.body)
+
+        res.should.have.status(404)
+        res.body.should.be.a("object")
+        res.body.should.have.property("status").eq(404)
+        res.body.should.have.property("message").eq("User not found")
+        res.body.should.have.property("data").that.is.empty // niet ingelogd
+
+        done()
+      })
+  })
 })
