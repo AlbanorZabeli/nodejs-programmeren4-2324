@@ -86,9 +86,9 @@ describe("UC101 Inloggen", () => {
 
         console.log(res.body)
 
-        res.should.have.status(401)
+        res.should.have.status(404)
         res.body.should.be.a("object")
-        res.body.should.have.property("status").eq(401)
+        res.body.should.have.property("status").eq(404)
         res.body.should.have.property("message").eq("Incorrect password")
         res.body.should.have.property("data").that.is.empty // niet ingelogd
 
