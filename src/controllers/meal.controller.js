@@ -6,8 +6,16 @@ const jwt = require('jsonwebtoken')
 let mealController = {
     create: (req, res, next) => {
         const meal = req.body
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Extract the user ID from the decoded token
+        let cookId = decoded.id;
+        logger.info(cookId);
+
+
         logger.info('create meal', meal.name, meal.id)
-        mealService.create(meal, (error, success) => {
+        mealService.create(meal, cookId, (error, success) => {
             if (error) {
                 return next({
                     status: error.status,

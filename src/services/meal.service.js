@@ -6,13 +6,16 @@ const mealDao = require('../dao/MealDao')
 require('dotenv').config
 const { JsonWebTokenError } = require('jsonwebtoken')
 const MealDao = require('../dao/MealDao')
+const { json } = require('body-parser')
 
 const mealService = {
-    create: (meal, callback) => {
+    create: (meal, cookId, callback) => {
         logger.info('Creating meal', meal);
         // Prepare the SQL query to check if the name address already exists
         const query = "SELECT * FROM meal WHERE name = ?";
         const values = [meal.name];
+
+        meal.cookId = {cookId};
 
         // Execute the SQL query
         database.query(query, values, (error, results) => {
