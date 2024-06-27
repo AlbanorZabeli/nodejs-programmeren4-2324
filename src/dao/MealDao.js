@@ -68,24 +68,34 @@ const MealDao = {
         });
     },
     
-    delete(id, callback) {
-        let query = "DELETE * FROM meal WHERE id = ?";
-    
-        // Execute the SQL query to delete the meal by ID
-        database.query(query, [id], (error, results) => {
-            if (error) {
-                callback(error);
-                return;
+    delete(id, cookId, callback) {
+        const checkQuery = "SELECT * FROM meal WHERE id = ? AND cookId = ?";
+        database.query(checkQuery, [id, cookId], (checkError, checkResults) => {
+            if (checkError) {
+                return callback(checkError, null);
             }
     
-            // Check if any row was actually deleted
-            if (results.affectedRows === 0) {
-                callback({ message: `Error: Meal with id ${id} does not exist!` }, null);
+            // If no meal exists with the given ID and cookId, return an error
+            if (checkResults.length === 0) {
+                const err = new Error('No existing meal was found with id: ' + id + ' for the given user.');
+                return callback(err, null);
             } else {
-                callback(null, { message: `Meal with id ${id} deleted successfully.` });
+                // Meal exists and is owned by the cook, proceed with deletion
+                const deleteQuery = "DELETE FROM meal WHERE id = ? AND cookId = ?";
+                database.query(deleteQuery, [id, cookId], (deleteError, deleteResults) => {
+                    if (deleteError) {
+                        return callback(deleteError, null);
+                    }                    
+                    if (deleteResults.affectedRows === 0) {
+                        const err = new Error('No existing meal was found with id: ' + id);
+                        return callback(err, null);
+                    }
+                    // Confirm deletion
+                    callback(null, { message: `Meal with id ${id} deleted successfully.` });
+                });
             }
         });
-    },
+}
 }
     
 

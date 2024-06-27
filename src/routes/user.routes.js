@@ -138,6 +138,6 @@ router.post('/api/user', validateUserCreateChaiExpect, userController.create);
 router.get('/api/user', validateToken, userController.getAll);
 router.get('/api/user/:userId', validateToken, userController.getById);
 router.put('/api/user/:userId', validateToken, userController.update);
-router.delete('/api/user/:userId', validateToken, userController.delete);
+router.delete('/api/user', validateToken, userController.delete);
 
 module.exports = router

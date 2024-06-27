@@ -68,7 +68,11 @@ let userController = {
 
     // Todo: Implement the update and delete methods
     delete: (req, res, next) => {
-        const userId = parseInt(req.params.userId, 10);
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const userId = decoded.id;
         logger.trace('delete user', userId);
         userService.delete(userId, (error, success) => {
             if (error) {
@@ -87,10 +91,16 @@ let userController = {
     },
 
     update: (req, res, next) => {
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Extract the user ID from the decoded token
+        let verifiedId = decoded.id;
+        logger.info(verifiedId);
         const userId = parseInt(req.params.userId, 10);
         const userData = req.body;
         logger.trace('update user', userId);
-        userService.update(userId, userData, (error, success) => {
+        userService.update(userId, verifiedId, userData, (error, success) => {
             if (error) {
                 return next({
                     status: error.status || 500,

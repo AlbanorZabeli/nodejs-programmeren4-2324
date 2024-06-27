@@ -15,7 +15,7 @@ const mealService = {
         const query = "SELECT * FROM meal WHERE name = ?";
         const values = [meal.name];
 
-        meal.cookId = {cookId};
+        meal.cookId = cookId;
 
         // Execute the SQL query
         database.query(query, values, (error, results) => {
@@ -82,40 +82,21 @@ const mealService = {
         });
     },
 
-    delete: (id, callback) => {
+    delete: (id, cookId, callback) => {
         logger.info(`Attempting to delete meal with id ${id}`);
-    
-        // Prepare the SQL query to check if the meal exists
-        const checkQuery = "SELECT * FROM meal WHERE id = ?";
-    
-        // Execute the SQL query to check existence
-        database.query(checkQuery, [id], (checkError, checkResults) => {
-            if (checkError) {
-                logger.error('Error checking meal existence: ', checkError.message);
-                return callback(checkError, null);
-            }
-    
-            // If no meal exists with the given ID, return an error
-            if (checkResults.length === 0) {
-                const err = new Error('No existing meal was found with id: ' + id);
-                logger.error('Error: ', err.message);
-                return callback(err, null);
+        mealDao.delete(id, cookId, (err, data) => {
+            if (!data) {
+                logger.info(`meal not found with id ${id}`);
+                callback(new Error('meal not found with id ' + id), null);
+                logger.error('error getting meal: ', err.message || 'unknown error');
+                callback(err, null);
+            } else if (err) {
+                logger.error('error getting meal: ', err.message || 'unknown error');
+                callback(err, null);
             } else {
-                // meal exists, proceed with deletion
-                const deleteQuery = "DELETE FROM meal WHERE id = ?";
-                database.query(deleteQuery, [id], (deleteError, deleteResults) => {
-                    if (deleteError) {
-                        logger.error('Error deleting meal: ', deleteError.message);
-                        return callback(deleteError, null);
-                    }
-                    if (deleteResults.affectedRows === 0) {
-                        const err = new Error('No existing meal was found with id: ' + id);
-                        logger.error('Error: ', err.message);
-                        return callback(err, null);
-                    }
-                    // Confirm deletion
-                    logger.info(`meal with id ${id} deleted successfully.`);
-                    callback(null, { message: `meal with id ${id} deleted successfully.` });
+                callback(null, {
+                    message: `meal succesfully deleted with id: ${id}.`,
+                    data: data
                 });
             }
         });

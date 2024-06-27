@@ -62,21 +62,35 @@ const UserDao = {
         });
     },
 
-    getProfileById(id, callback) {
-        let query = "SELECT id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city FROM user WHERE id = ?";
+        getProfileById(id, callback){
+        let userQuery = "SELECT id, firstName, lastName, isActive, emailAdress, password, phoneNumber, roles, street, city FROM user WHERE id = ?";
+        let mealsQuery = "SELECT * FROM meal WHERE cookId = ?"; // Assuming there's a userId column in the meal table to associate meals with a user
     
-        // Execute the SQL query using the database connection
-        database.query(query, [id], (error, results) => {
+        // Execute the SQL query to fetch user profile
+        database.query(userQuery, [id], (error, userResults) => {
             if (error) {
                 callback(error, null);
                 return;
             }
+    
             // Check if any result is returned; if not, handle the "not found" case
-            if (results.length === 0) {
+            if (userResults.length === 0) {
                 callback({ message: `Error: User with id ${id} does not exist!` }, null);
             } else {
-                // Return the first result since ID should be unique and only one record should match
-                callback(null, results[0]);
+                // Fetch the meals associated with the user
+                database.query(mealsQuery, [id], (mealError, mealResults) => {
+                    if (mealError) {
+                        callback(mealError, null);
+                        return;
+                    }
+    
+                    // Combine the user profile and meals into a single response
+                    let userProfile = userResults[0];
+                    userProfile.meals = mealResults; // Add the meals to the user profile
+    
+                    // Return the combined result
+                    callback(null, userProfile);
+                });
             }
         });
     },

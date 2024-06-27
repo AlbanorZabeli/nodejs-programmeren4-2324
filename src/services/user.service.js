@@ -117,32 +117,51 @@ const userService = {
                 logger.error('Error: ', err.message);
                 return callback(err, null);
             } else {
-                // User exists, proceed with deletion
-                const deleteQuery = "DELETE FROM user WHERE id = ?";
-                database.query(deleteQuery, [id], (deleteError, deleteResults) => {
-                    if (deleteError) {
-                        logger.error('Error deleting user: ', deleteError.message);
-                        return callback(deleteError, null);
+                // Prepare SQL query to delete all meals associated with the user
+                const deleteMealsQuery = "DELETE FROM meal WHERE cookId = ?";
+                database.query(deleteMealsQuery, [id], (deleteMealsError, deleteMealsResults) => {
+                    if (deleteMealsError) {
+                        logger.error('Error deleting meals: ', deleteMealsError.message);
+                        return callback(deleteMealsError, null);
                     }
-                    if (deleteResults.affectedRows === 0) {
-                        const err = new Error('No existing user was found with id: ' + id);
-                        logger.error('Error: ', err.message);
-                        return callback(err, null);
-                    }
-                    // Confirm deletion
-                    logger.info(`User with id ${id} deleted successfully.`);
-                    callback(null, { message: `User with id ${id} deleted successfully.` });
+            
+                    logger.info(`Meals for user with id ${id} deleted successfully.`);
+            
+                    // Prepare SQL query to delete the user
+                    const deleteUserQuery = "DELETE FROM user WHERE id = ?";
+                    database.query(deleteUserQuery, [id], (deleteUserError, deleteUserResults) => {
+                        if (deleteUserError) {
+                            logger.error('Error deleting user: ', deleteUserError.message);
+                            return callback(deleteUserError, null);
+                        }
+                        if (deleteUserResults.affectedRows === 0) {
+                            const err = new Error('No existing user was found with id: ' + id);
+                            logger.error('Error: ', err.message);
+                            return callback(err, null);
+                        }
+            
+                        // Confirm deletion
+                        logger.info(`User with id ${id} deleted successfully.`);
+                        callback(null, { message: `User with id ${id} deleted successfully.` });
+                    });
                 });
-            }
+            };
         });
     },
     
-    update: (id, user, callback) => {
+    update: (id, verifiedId, user, callback) => {
         logger.info(`Attempting to update user with id ${id}`, user);
     
         // Prepare SQL query to check if the user exists
         const checkUserExistsQuery = "SELECT * FROM user WHERE id = ?";
         
+        if (verifiedId !== id) {
+            const unauthorizedError = new Error('Unauthorized, you are only allowed to change your own account');
+            logger.error('Unauthorized, you are only allowed to change your own account');
+            return callback(unauthorizedError, null);
+        }
+
+
         database.query(checkUserExistsQuery, [id], (existError, existResults) => {
             if (existError) {
                 logger.error('Error checking user existence: ', existError.message);
