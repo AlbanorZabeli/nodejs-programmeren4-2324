@@ -5,7 +5,7 @@ const server = require("../index")
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC205 Inloggen", () => {
+describe("UC205 Profiel updaten", () => {
 
 
   it("TC 205-1-1 Niet ingelogd", (done) => {

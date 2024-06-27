@@ -5,10 +5,10 @@ const server = require("../index")
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC204 Niet ingelogd", () => {
+describe("UC204 Profiel ophalen", () => {
 
 
-  it("TC 204-1-1 geen e-mail meegegeven", (done) => {
+  it("TC 204-1-1 Niet ingelogd", (done) => {
     chai
       .request(server)
       .post("/api/login")

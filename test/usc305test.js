@@ -5,7 +5,7 @@ const server = require("../index")
 chai.should()
 chai.use(chaiHttp)
 
-describe("UC305 Inloggen", () => {
+describe("UC305 Maaltijd verwijderen", () => {
 
 
   it("TC 305-1-1 Verwijderen maaltijd", (done) => {
