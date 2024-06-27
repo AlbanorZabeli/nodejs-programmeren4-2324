@@ -87,7 +87,7 @@ const mealService = {
         mealDao.delete(id, cookId, (err, data) => {
             if (!data) {
                 logger.info(`meal not found with id ${id}`);
-                callback(new Error('meal not found with id ' + id), null);
+                callback(new Error('No existing meal was found with id: ' + id + ' for the given user.'), null);
                 logger.error('error getting meal: ', err.message || 'unknown error');
                 callback(err, null);
             } else if (err) {
